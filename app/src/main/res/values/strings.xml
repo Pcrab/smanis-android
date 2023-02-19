@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Smanis</string>
+    <string name="navigation_drawer">Navigation Drawer</string>
+    <string name="tab_exam">Exam</string>
+    <string name="tab_manage">Manage</string>
+    <string name="tab_settings">Settings</string>
 </resources>
