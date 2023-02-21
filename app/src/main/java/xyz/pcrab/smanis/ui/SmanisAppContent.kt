@@ -1,6 +1,8 @@
 package xyz.pcrab.smanis.ui
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import xyz.pcrab.smanis.ui.content.*
 import xyz.pcrab.smanis.utils.state.SmanisContentType
 
 
@@ -16,3 +18,38 @@ fun SmanisAppContent(
     }
 }
 
+@Composable
+fun SmanisCompactContent(selectedDestination: String = SmanisDestinations.MANAGE) {
+    when (selectedDestination) {
+        SmanisDestinations.EXAM -> {
+            ExamCompactContent()
+        }
+        SmanisDestinations.MANAGE -> {
+            ManageCompactContent()
+        }
+        SmanisDestinations.SETTINGS -> {
+            SettingsCompactContent()
+        }
+        else -> {
+            Text(text = "Unknown selected destination: $selectedDestination")
+        }
+    }
+}
+
+@Composable
+fun SmanisExtendedContent(selectedDestination: String = SmanisDestinations.MANAGE) {
+    when (selectedDestination) {
+        SmanisDestinations.EXAM -> {
+            ExamExtendedContent()
+        }
+        SmanisDestinations.MANAGE -> {
+            ManageExtendedContent()
+        }
+        SmanisDestinations.SETTINGS -> {
+            SettingsExtendedContent()
+        }
+        else -> {
+            Text(text = "Unknown selected destination: $selectedDestination")
+        }
+    }
+}

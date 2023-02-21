@@ -32,6 +32,7 @@ fun NavigationDrawerContent(
             .wrapContentWidth()
             .fillMaxHeight()
             .padding(24.dp)
+            .width(200.dp)
     ) {
         Row(
             modifier = modifier

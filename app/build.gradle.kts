@@ -55,6 +55,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:${rootProject.extra.get("compose_version") as String}")
 
     implementation("androidx.window:window:1.0.0")
+    implementation("androidx.core:core-ktx:1.9.0")
 
     val material3Version = "1.1.0-alpha06"
     implementation("androidx.compose.material3:material3:$material3Version")
