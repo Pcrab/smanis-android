@@ -7,8 +7,8 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-val Clent = HttpClient(OkHttp) {
-    expectSuccess = true;
+val Client = HttpClient(OkHttp) {
+    expectSuccess = true
     install(Logging) {
         logger = Logger.DEFAULT
         level = LogLevel.HEADERS
