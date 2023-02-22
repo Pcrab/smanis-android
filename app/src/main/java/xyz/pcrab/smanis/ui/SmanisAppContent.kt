@@ -2,54 +2,30 @@ package xyz.pcrab.smanis.ui
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import xyz.pcrab.smanis.ui.content.*
+import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import xyz.pcrab.smanis.utils.state.SmanisContentType
 
 
 @Composable
 fun SmanisAppContent(
     contentType: SmanisContentType,
-    selectedDestination: String = SmanisDestinations.MANAGE,
+    viewModel: SmanisViewModel,
 ) {
-    if (contentType == SmanisContentType.EXTENDED) {
-        SmanisExtendedContent(selectedDestination = selectedDestination)
-    } else {
-        SmanisCompactContent(selectedDestination = selectedDestination)
-    }
-}
-
-@Composable
-fun SmanisCompactContent(selectedDestination: String = SmanisDestinations.MANAGE) {
-    when (selectedDestination) {
+    val uiState = viewModel.uiState.collectAsState().value
+    when (uiState.currentDestination) {
         SmanisDestinations.EXAM -> {
-            ExamCompactContent()
+            ExamContent(viewModel, contentType)
         }
         SmanisDestinations.MANAGE -> {
-            ManageCompactContent()
+            ManageContent(viewModel, contentType)
         }
         SmanisDestinations.SETTINGS -> {
-            SettingsCompactContent()
+            SettingsContent(viewModel, contentType)
         }
         else -> {
-            Text(text = "Unknown selected destination: $selectedDestination")
-        }
-    }
-}
-
-@Composable
-fun SmanisExtendedContent(selectedDestination: String = SmanisDestinations.MANAGE) {
-    when (selectedDestination) {
-        SmanisDestinations.EXAM -> {
-            ExamExtendedContent()
-        }
-        SmanisDestinations.MANAGE -> {
-            ManageExtendedContent()
-        }
-        SmanisDestinations.SETTINGS -> {
-            SettingsExtendedContent()
-        }
-        else -> {
-            Text(text = "Unknown selected destination: $selectedDestination")
+            Text(text = "Unknown selected destination: ${uiState.currentDestination}")
         }
     }
 }

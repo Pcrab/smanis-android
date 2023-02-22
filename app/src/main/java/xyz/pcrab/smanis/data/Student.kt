@@ -5,4 +5,4 @@ data class Student(
     val username: String,
 )
 
-typealias Students = Array<Student>
+typealias Students = List<Student>

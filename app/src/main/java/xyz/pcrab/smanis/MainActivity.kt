@@ -3,6 +3,7 @@ package xyz.pcrab.smanis
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -17,12 +18,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import xyz.pcrab.smanis.ui.SmanisApp
+import xyz.pcrab.smanis.ui.data.SmanisUIState
+import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import xyz.pcrab.smanis.ui.theme.SmanisTheme
 import xyz.pcrab.smanis.utils.state.DevicePosture
 import xyz.pcrab.smanis.utils.state.isBookPosture
 import xyz.pcrab.smanis.utils.state.isSeparating
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: SmanisViewModel by viewModels()
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +40,10 @@ class MainActivity : ComponentActivity() {
                     layoutInfo.displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()
                 when {
                     isBookPosture(foldingFeature) -> DevicePosture.BookPosture(foldingFeature.bounds)
-                    isSeparating(foldingFeature) -> DevicePosture.Separating(foldingFeature.bounds, foldingFeature.orientation)
+                    isSeparating(foldingFeature) -> DevicePosture.Separating(
+                        foldingFeature.bounds,
+                        foldingFeature.orientation
+                    )
                     else -> DevicePosture.NormalPosture
                 }
             }
@@ -48,7 +57,7 @@ class MainActivity : ComponentActivity() {
             SmanisTheme {
                 val windowSize = calculateWindowSizeClass(this)
                 val devicePosture = devicePostureFlow.collectAsState().value
-                SmanisApp(windowSize.widthSizeClass, devicePosture)
+                SmanisApp(windowSize.widthSizeClass, devicePosture, viewModel)
             }
         }
     }
@@ -58,7 +67,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SmanisAppCompactPreview() {
     SmanisTheme {
-        SmanisApp(windowSize = WindowWidthSizeClass.Compact, DevicePosture.NormalPosture)
+        SmanisApp(
+            windowSize = WindowWidthSizeClass.Compact,
+            foldingDevicePosture = DevicePosture.NormalPosture,
+            viewModel = SmanisViewModel()
+        )
     }
 }
 
@@ -66,7 +79,11 @@ fun SmanisAppCompactPreview() {
 @Composable
 fun SmanisAppMediumPreview() {
     SmanisTheme {
-        SmanisApp(windowSize = WindowWidthSizeClass.Medium, DevicePosture.NormalPosture)
+        SmanisApp(
+            windowSize = WindowWidthSizeClass.Medium,
+            foldingDevicePosture = DevicePosture.NormalPosture,
+            viewModel = SmanisViewModel()
+        )
     }
 }
 
@@ -74,6 +91,10 @@ fun SmanisAppMediumPreview() {
 @Composable
 fun SmanisAppExpandedPreview() {
     SmanisTheme {
-        SmanisApp(windowSize = WindowWidthSizeClass.Expanded, DevicePosture.NormalPosture)
+        SmanisApp(
+            windowSize = WindowWidthSizeClass.Expanded,
+            foldingDevicePosture = DevicePosture.NormalPosture,
+            viewModel = SmanisViewModel()
+        )
     }
 }

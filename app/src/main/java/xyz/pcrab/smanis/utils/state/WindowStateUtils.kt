@@ -35,5 +35,5 @@ enum class SmanisNavigationType {
 }
 
 enum class SmanisContentType {
-    COMPAT, EXTENDED
+    COMPACT, EXTENDED
 }

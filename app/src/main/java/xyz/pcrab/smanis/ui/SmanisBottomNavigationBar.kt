@@ -1,6 +1,8 @@
 package xyz.pcrab.smanis.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ManageAccounts
@@ -13,12 +15,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import xyz.pcrab.smanis.R
 
 @Composable
 @Preview
-fun SmanisBottomNavigationBar(selectedDestination: String = SmanisDestinations.MANAGE, selectDestination: (String) -> Unit = {}) {
-    NavigationBar(modifier = Modifier.fillMaxWidth()) {
+fun SmanisBottomNavigationBar(
+    selectedDestination: String = SmanisDestinations.MANAGE,
+    selectDestination: (String) -> Unit = {}
+) {
+    NavigationBar(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()) {
         NavigationBarItem(
             selected = selectedDestination == SmanisDestinations.EXAM,
             onClick = {
