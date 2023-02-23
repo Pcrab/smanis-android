@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.datetime.Instant
+import xyz.pcrab.smanis.data.Exam
 import xyz.pcrab.smanis.data.Student
 import xyz.pcrab.smanis.data.Students
 import xyz.pcrab.smanis.ui.SmanisDestinations
@@ -28,7 +30,28 @@ class SmanisViewModel : ViewModel() {
     init {
         updateAllStudents(
             listOf(
-                Student(id = "1", username = "Student 1"),
+                Student(
+                    id = "1", username = "Student 1", exams = listOf(
+                        Exam(
+                            video = "111112",
+                            score = 100,
+                            points = mapOf(),
+                            takenTime = Instant.DISTANT_PAST
+                        ),
+                        Exam(
+                            video = "221133",
+                            score = 100,
+                            points = mapOf(),
+                            takenTime = Instant.DISTANT_PAST
+                        ),
+                        Exam(
+                            video = "321321",
+                            score = 100,
+                            points = mapOf(),
+                            takenTime = Instant.DISTANT_PAST
+                        ),
+                    )
+                ),
                 Student(id = "2", username = "Student 2"),
                 Student(id = "3", username = "Student 3"),
                 Student(id = "4", username = "Student 4"),

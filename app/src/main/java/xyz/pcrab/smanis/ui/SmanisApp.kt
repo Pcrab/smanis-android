@@ -84,7 +84,7 @@ private fun SmanisNavigationWrapperUI(
                             })
                     }
                 }) {
-                SmanisAppContent(contentType, viewModel)
+                SmanisAppContent(contentType = contentType, viewModel = viewModel)
             }
         }
         SmanisNavigationType.NAVIGATION_RAIL -> {
@@ -118,7 +118,7 @@ private fun SmanisNavigationWrapperUI(
                         selectDestination = {
                             viewModel.updateCurrentDestination(it)
                         })
-                    SmanisAppContent(contentType, viewModel)
+                    SmanisAppContent(contentType = contentType, viewModel = viewModel)
                 }
             }
         }
@@ -129,7 +129,11 @@ private fun SmanisNavigationWrapperUI(
                     .background(MaterialTheme.colorScheme.inverseOnSurface),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                SmanisAppContent(contentType, viewModel)
+                SmanisAppContent(
+                    modifier = Modifier.weight(1f),
+                    contentType = contentType,
+                    viewModel = viewModel
+                )
                 SmanisBottomNavigationBar(uiState.currentDestination, selectDestination = {
                     viewModel.updateCurrentDestination(it)
                 })

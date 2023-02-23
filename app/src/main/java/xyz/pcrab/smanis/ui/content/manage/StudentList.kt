@@ -5,11 +5,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -18,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import xyz.pcrab.smanis.R
 import xyz.pcrab.smanis.data.Student
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,9 +72,10 @@ fun StudentList(
             )
         ) {
             items(displayStudents) { student ->
-                StudentCard(interactionSource = interactionSource, student = student) {
+                StudentCard(focusManager = focusManager, student = student) {
                     onClickStudent(it)
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
@@ -79,12 +83,37 @@ fun StudentList(
 
 @Composable
 fun StudentCard(
-    interactionSource: MutableInteractionSource,
+    focusManager: FocusManager,
     student: Student,
     onClick: (student: Student) -> Unit = {}
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    Text(modifier = Modifier.clickable {
-        onClick(student)
-    }, text = student.username)
+    val fontSize = 20.sp
+
+    ListItem(
+        modifier = Modifier
+            .clickable {
+                focusManager.clearFocus()
+                onClick(student)
+            },
+        headlineText = {
+            Text(text = student.username, fontSize = fontSize)
+        },
+        supportingText = {
+            Text(text = student.id, fontSize = fontSize * 0.8f)
+        },
+        leadingContent = {
+            Icon(
+                modifier = Modifier.size(30.dp),
+                imageVector = Icons.Rounded.Favorite,
+                contentDescription = "Student icon"
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Go to student info"
+            )
+        }
+    )
+
 }

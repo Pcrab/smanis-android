@@ -3,11 +3,16 @@ package xyz.pcrab.smanis.ui.content
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import xyz.pcrab.smanis.utils.state.SmanisContentType
 
 @Composable
-fun ExamContent(viewModel: SmanisViewModel, contentType: SmanisContentType) {
+fun ExamContent(
+    modifier: Modifier = Modifier,
+    viewModel: SmanisViewModel,
+    contentType: SmanisContentType
+) {
     when (contentType) {
         SmanisContentType.EXTENDED -> {
             ExamExtendedContent(viewModel)
