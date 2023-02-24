@@ -1,6 +1,5 @@
 package xyz.pcrab.smanis.ui.content
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import xyz.pcrab.smanis.data.Exam
 import xyz.pcrab.smanis.data.Student
@@ -19,6 +17,7 @@ import xyz.pcrab.smanis.ui.content.manage.StudentInfo
 import xyz.pcrab.smanis.ui.content.manage.StudentList
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import xyz.pcrab.smanis.utils.state.SmanisContentType
+import kotlin.system.exitProcess
 
 @Composable
 fun ManageContent(
@@ -38,7 +37,6 @@ fun ManageContent(
 
 @Composable
 fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewModel) {
-    val activity = LocalContext.current as Activity
 //    val uiState = viewModel.uiState.collectAsState().value
     var displayStudent by remember {
         mutableStateOf<Student?>(null)
@@ -104,7 +102,7 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
             showStudentInfo = false
         } else {
             // exit app
-            activity.finish()
+            exitProcess(0)
         }
     }
 }
