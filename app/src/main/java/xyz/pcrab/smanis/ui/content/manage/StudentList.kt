@@ -3,8 +3,8 @@ package xyz.pcrab.smanis.ui.content.manage
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.rounded.Favorite
@@ -47,7 +47,7 @@ fun StudentList(
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(bottom = 20.dp),
             textStyle = TextStyle.Default.copy(fontSize = searchFontSize),
             value = searchText,
             label = {
@@ -63,15 +63,10 @@ fun StudentList(
                 }
             },
         )
-        LazyColumn(
-            modifier = Modifier.padding(
-                PaddingValues(
-                    horizontal = 20.dp,
-                    vertical = 10.dp
-                )
-            )
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            items(displayStudents) { student ->
+            displayStudents.forEach { student ->
                 StudentCard(focusManager = focusManager, student = student) {
                     onClickStudent(it)
                 }
@@ -83,37 +78,26 @@ fun StudentList(
 
 @Composable
 fun StudentCard(
-    focusManager: FocusManager,
-    student: Student,
-    onClick: (student: Student) -> Unit = {}
+    focusManager: FocusManager, student: Student, onClick: (student: Student) -> Unit = {}
 ) {
     val fontSize = 20.sp
 
-    ListItem(
-        modifier = Modifier
-            .clickable {
-                focusManager.clearFocus()
-                onClick(student)
-            },
-        headlineText = {
-            Text(text = student.username, fontSize = fontSize)
-        },
-        supportingText = {
-            Text(text = student.id, fontSize = fontSize * 0.8f)
-        },
-        leadingContent = {
-            Icon(
-                modifier = Modifier.size(30.dp),
-                imageVector = Icons.Rounded.Favorite,
-                contentDescription = "Student icon"
-            )
-        },
-        trailingContent = {
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Go to student info"
-            )
-        }
-    )
-
+    ListItem(modifier = Modifier.clickable {
+        focusManager.clearFocus()
+        onClick(student)
+    }, headlineText = {
+        Text(text = student.username, fontSize = fontSize)
+    }, supportingText = {
+        Text(text = student.id, fontSize = fontSize * 0.8f)
+    }, leadingContent = {
+        Icon(
+            modifier = Modifier.size(30.dp),
+            imageVector = Icons.Rounded.Favorite,
+            contentDescription = "Student icon"
+        )
+    }, trailingContent = {
+        Icon(
+            imageVector = Icons.Default.ArrowForward, contentDescription = "Go to student info"
+        )
+    })
 }

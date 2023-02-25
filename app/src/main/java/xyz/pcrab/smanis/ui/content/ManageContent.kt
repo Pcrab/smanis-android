@@ -6,9 +6,11 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import xyz.pcrab.smanis.data.Exam
 import xyz.pcrab.smanis.data.Student
 import xyz.pcrab.smanis.ui.SmanisDestinations
@@ -30,7 +32,7 @@ fun ManageContent(
             ManageExtendedContent(modifier = modifier, viewModel = viewModel)
         }
         SmanisContentType.COMPACT -> {
-            ManageCompactContent(modifier = modifier, viewModel = viewModel)
+            ManageCompactContent(modifier = modifier.padding(20.dp), viewModel = viewModel)
         }
     }
 }
@@ -88,6 +90,7 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
         ) {
             ExamInfo(
                 modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
                 exam = displayExam,
                 onClickBack = {
                     showExamInfo = false

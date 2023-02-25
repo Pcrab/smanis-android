@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import xyz.pcrab.smanis.ui.SmanisApp
-import xyz.pcrab.smanis.ui.data.SmanisUIState
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import xyz.pcrab.smanis.ui.theme.SmanisTheme
 import xyz.pcrab.smanis.utils.state.DevicePosture
@@ -32,6 +31,9 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.initRemoteUrl(applicationContext)
+        println(viewModel.uiState.value.remoteUrl)
 
         val devicePostureFlow = WindowInfoTracker.getOrCreate(this).windowLayoutInfo(this)
             .flowWithLifecycle(this.lifecycle)
