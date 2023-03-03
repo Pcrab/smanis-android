@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,10 +57,13 @@ class SmanisViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response: ByteArray = Client.get(videoUri).body()
-                val file = File(context.filesDir, fileName)
-                val tmpFile = File(context.filesDir, "$fileName.tmp")
+                val file = File(context.cacheDir, fileName)
+                val tmpFile = File(context.cacheDir, "$fileName.tmp")
                 tmpFile.writeBytes(response)
                 tmpFile.copyTo(file, overwrite = true)
+                tmpFile.delete()
+            } catch (e: ClientRequestException) {
+                e.printStackTrace()
             } finally {
                 videoDownloading = false
             }
@@ -81,14 +85,17 @@ class SmanisViewModel : ViewModel() {
                         ),
                         Exam(
                             id = "212233",
-                            video = "221133",
+                            video = "221133.mp4",
                             score = 100,
-                            points = mapOf(),
+                            points = mapOf(
+                                "12000" to 8,
+                                "2000" to 10,
+                            ),
                             takenTime = Instant.DISTANT_PAST
                         ),
                         Exam(
                             id = "323124",
-                            video = "321321",
+                            video = "321321.mp4",
                             score = 100,
                             points = mapOf(),
                             takenTime = Instant.DISTANT_PAST
