@@ -3,9 +3,7 @@ package xyz.pcrab.smanis.ui.content.manage
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
@@ -42,7 +40,7 @@ fun ExamInfo(
     val uiState = viewModel.uiState.collectAsState().value
     val context = LocalContext.current
 
-    val localVideoFile = File(context.filesDir, exam.video)
+    val localVideoFile = File(context.cacheDir, exam.video)
     var displayUri = localVideoFile.toURI().toString()
     if (!localVideoFile.exists()) {
         displayUri = uiState.remoteUrl + exam.video
@@ -61,18 +59,20 @@ fun ExamInfo(
     }
     exoPlayer.addListener(object : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
-//            super.onPlayerError(error)
+            super.onPlayerError(error)
             Log.e("Player", error.message.toString())
         }
     })
     exoPlayer.playWhenReady = true
     exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-    exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ONE
+    exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_OFF
+
 
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.inverseOnSurface)
             .clickable(interactionSource = interactionSource, indication = null) {}
+            .verticalScroll(rememberScrollState())
             .focusable(true)
     ) {
         Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable {
@@ -94,6 +94,7 @@ fun ExamInfo(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
+
                 }
             })
         ) {
@@ -102,6 +103,12 @@ fun ExamInfo(
             }
         }
 
-        Column {}
+        Column {
+            exam.points.forEach { (key, value) ->
+                Text(text = "$key: $value", modifier = Modifier.clickable {
+                    exoPlayer.seekTo(key.toLong())
+                })
+            }
+        }
     }
 }
