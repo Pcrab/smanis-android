@@ -100,4 +100,8 @@ dependencies {
 
     implementation("androidx.camera:camera-view:${cameraxVersion}")
     implementation("androidx.camera:camera-extensions:${cameraxVersion}")
+
+    val accompanistPermissionsVersion = "0.23.1"
+    implementation("com.google.accompanist:accompanist-permissions:$accompanistPermissionsVersion")
+
 }
