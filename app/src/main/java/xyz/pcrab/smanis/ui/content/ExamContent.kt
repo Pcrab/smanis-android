@@ -4,28 +4,26 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import kotlinx.coroutines.launch
 import xyz.pcrab.smanis.R
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import xyz.pcrab.smanis.utils.state.SmanisContentType
@@ -71,6 +69,7 @@ suspend fun Context.createVideoCaptureUseCase(
     previewView: PreviewView
 ): VideoCapture<Recorder> {
     val preview = Preview.Builder()
+        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
         .build()
         .apply { setSurfaceProvider(previewView.surfaceProvider) }
 
@@ -95,7 +94,6 @@ suspend fun Context.createVideoCaptureUseCase(
 
     return videoCapture
 }
-
 
 @SuppressLint("MissingPermission")
 fun startRecordingVideo(
@@ -163,12 +161,13 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
         permissionsNotAvailableContent = { /* ... */ }
     ) {
 
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Column {
+            Spacer(modifier = Modifier.height(40.dp))
             AndroidView(
                 factory = { previewView },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(30.dp)
             )
             Column {
                 Text(
@@ -210,41 +209,9 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
                     },
                     text = "Test recording"
                 )
-                if (!recordingStarted.value) {
-                    Text(
-                        modifier = Modifier.clickable {
-                            audioEnabled.value = !audioEnabled.value
-                        },
-                        text = "Test !recording, toggle audio"
-                    )
-                }
-                if (!recordingStarted.value) {
-                    Text(
-                        modifier = Modifier.clickable {
-                            cameraSelector.value =
-                                if (cameraSelector.value == CameraSelector.DEFAULT_BACK_CAMERA) CameraSelector.DEFAULT_FRONT_CAMERA
-                                else CameraSelector.DEFAULT_BACK_CAMERA
-                            lifecycleOwner.lifecycleScope.launch {
-                                videoCapture.value = context.createVideoCaptureUseCase(
-                                    lifecycleOwner = lifecycleOwner,
-                                    cameraSelector = cameraSelector.value,
-                                    previewView = previewView
-                                )
-                            }
-                        },
-                        text = "Test !recording, toggle camera"
-                    )
-                }
-                Text(text = "recordingStarted: ${recordingStarted.value}")
-                Text(text = "audioEnabled: ${audioEnabled.value}")
-                Text(text = "cameraSelector: ${cameraSelector.value}")
-                Text(text = "dis: $dis")
             }
-
         }
-
     }
-
 }
 
 @Composable
