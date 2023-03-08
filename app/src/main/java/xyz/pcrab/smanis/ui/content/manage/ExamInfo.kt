@@ -1,5 +1,6 @@
 package xyz.pcrab.smanis.ui.content.manage
 
+import android.content.Context
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -24,49 +25,105 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import io.ktor.client.request.*
 import xyz.pcrab.smanis.data.Exam
+import xyz.pcrab.smanis.ui.data.SmanisUIState
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import java.io.File
+
+fun parseDisplayUri(
+    context: Context,
+    viewModel: SmanisViewModel = SmanisViewModel(),
+    path: String,
+    uiState: SmanisUIState,
+    uri: String
+): String {
+    val localVideoFile = File(context.cacheDir, "$path$uri")
+    println(localVideoFile.absolutePath)
+    var displayUri = localVideoFile.toURI().toString()
+    if (!localVideoFile.exists()) {
+        println("File not exist, downloading...")
+        displayUri = "${uiState.remoteUrl}${path}${uri}"
+        viewModel.fetchVideoFile(
+            videoUri = displayUri,
+            path = path,
+            fileName = uri,
+            context = context
+        )
+    }
+    return displayUri
+}
+
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+fun buildPlayer(context: Context, uri: String): ExoPlayer {
+    val player = ExoPlayer.Builder(context)
+        .build()
+        .apply {
+            val dataSourceFactory = DefaultDataSource.Factory(context)
+            val source = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(uri))
+            setMediaSource(source)
+            prepare()
+        }
+    player.addListener(object : Player.Listener {
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            Log.e("Player", error.message.toString())
+        }
+    })
+    player.playWhenReady = false
+    player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+    player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
+    return player
+}
+
+data class ExamPlayerInfo(
+    val player: ExoPlayer,
+    val score: Int,
+)
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun ExamInfo(
     modifier: Modifier = Modifier,
     viewModel: SmanisViewModel = SmanisViewModel(),
+    studentId: String? = null,
     exam: Exam? = null,
     onClickBack: () -> Unit = {},
 ) {
-    if (exam == null) return
+    if (exam == null || studentId == null) return
     val interactionSource = MutableInteractionSource()
     val uiState = viewModel.uiState.collectAsState().value
     val context = LocalContext.current
+    val videoPath = "${studentId}/${exam.id}/"
 
-    val localVideoFile = File(context.cacheDir, exam.video)
-    var displayUri = localVideoFile.toURI().toString()
-    if (!localVideoFile.exists()) {
-        displayUri = uiState.remoteUrl + exam.video
-        viewModel.fetchVideoFile(videoUri = displayUri, fileName = exam.video, context = context)
+    val players = remember {
+        mutableMapOf<String, ExamPlayerInfo>()
     }
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context)
-            .build()
-            .apply {
-                val dataSourceFactory = DefaultDataSource.Factory(context)
-                val source = ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(displayUri))
-                setMediaSource(source)
-                prepare()
-            }
+    exam.points.forEach {
+        players[it.key] = ExamPlayerInfo(
+            player = buildPlayer(
+                context = context,
+                uri = parseDisplayUri(
+                    context = context,
+                    uiState = uiState,
+                    viewModel = viewModel,
+                    path = videoPath,
+                    uri = "${it.key}.mp4"
+                )
+            ),
+            score = it.value
+        )
     }
-    exoPlayer.addListener(object : Player.Listener {
-        override fun onPlayerError(error: PlaybackException) {
-            super.onPlayerError(error)
-            Log.e("Player", error.message.toString())
-        }
-    })
-    exoPlayer.playWhenReady = true
-    exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-    exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_OFF
-
+    val fullPlayer =
+        buildPlayer(
+            context = context,
+            uri = parseDisplayUri(
+                context = context,
+                uiState = uiState,
+                viewModel = viewModel,
+                path = videoPath,
+                uri = "full.mp4"
+            )
+        )
 
     Column(
         modifier = modifier
@@ -80,35 +137,39 @@ fun ExamInfo(
         })
         Text(text = exam.video)
         Text(text = "remoteUrl: ${uiState.remoteUrl}")
-        Text(text = "displayUri: $displayUri")
 
-        DisposableEffect(
-            AndroidView(factory = {
-                PlayerView(context).apply {
-                    hideController()
-                    useController = true
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-
-                    player = exoPlayer
-                    layoutParams = FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-
-                }
-            })
-        ) {
-            onDispose {
-                exoPlayer.release()
-            }
-        }
+        DisplayVideoView(context = context, exoPlayer = fullPlayer)
 
         Column {
-            exam.points.forEach { (key, value) ->
-                Text(text = "$key: $value", modifier = Modifier.clickable {
-                    exoPlayer.seekTo(key.toLong())
-                })
+            players.forEach { (key, value) ->
+                Text(text = "$key: ${value.score}")
+                DisplayVideoView(context = context, exoPlayer = value.player)
             }
         }
     }
+}
+
+@Composable
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+fun DisplayVideoView(context: Context, exoPlayer: ExoPlayer) {
+    DisposableEffect(
+        AndroidView(factory = {
+            PlayerView(context).apply {
+                hideController()
+                useController = true
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                player = exoPlayer
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+
+            }
+        })
+    ) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+    return
 }

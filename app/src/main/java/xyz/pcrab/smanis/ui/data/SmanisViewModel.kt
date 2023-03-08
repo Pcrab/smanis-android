@@ -50,22 +50,23 @@ class SmanisViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(remoteUrl = realNewRemoteUrl)
     }
 
-    var videoDownloading = false
-    fun fetchVideoFile(videoUri: String, fileName: String, context: Context) {
-        if (videoDownloading) return
-        videoDownloading = true
+    fun fetchVideoFile(videoUri: String, path: String = "", fileName: String, context: Context) {
         viewModelScope.launch {
             try {
+                val finalPath =
+                    if (path.isEmpty()) "" else if (path.endsWith("/")) path else "$path/"
+                val finalDirFile = File(context.cacheDir, finalPath)
+                if (!finalDirFile.exists()) {
+                    finalDirFile.mkdirs()
+                }
                 val response: ByteArray = Client.get(videoUri).body()
-                val file = File(context.cacheDir, fileName)
-                val tmpFile = File(context.cacheDir, "$fileName.tmp")
+                val file = File(context.cacheDir, "${finalPath}(fileName}")
+                val tmpFile = File(context.cacheDir, "${finalPath}${fileName}.tmp")
                 tmpFile.writeBytes(response)
                 tmpFile.copyTo(file, overwrite = true)
                 tmpFile.delete()
             } catch (e: ClientRequestException) {
                 e.printStackTrace()
-            } finally {
-                videoDownloading = false
             }
         }
 
@@ -75,12 +76,15 @@ class SmanisViewModel : ViewModel() {
         updateAllStudents(
             listOf(
                 Student(
-                    id = "1", username = "Student 1", exams = listOf(
+                    id = "110219", username = "Student 1", exams = listOf(
                         Exam(
                             id = "111112",
                             video = "111112.mp4",
                             score = 100,
-                            points = mapOf(),
+                            points = mapOf(
+                                "12000" to 8,
+                                "2000" to 10,
+                            ),
                             takenTime = Instant.DISTANT_PAST
                         ),
                         Exam(
@@ -102,9 +106,9 @@ class SmanisViewModel : ViewModel() {
                         ),
                     )
                 ),
-                Student(id = "2", username = "Student 2"),
-                Student(id = "3", username = "Student 3"),
-                Student(id = "4", username = "Student 4"),
+                Student(id = "291729", username = "Student 2"),
+                Student(id = "309921", username = "Student 3"),
+                Student(id = "489277", username = "Student 4"),
             )
         )
         updateCurrentStudent(null)
