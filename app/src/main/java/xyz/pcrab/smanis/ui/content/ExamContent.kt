@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -169,44 +170,52 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
                     .fillMaxWidth()
                     .padding(30.dp)
             )
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp)
+            ) {
                 Text(
-                    modifier = Modifier.clickable {
-                        if (!recordingStarted.value) {
-                            videoCapture.value?.let { videoCapture ->
-                                recordingStarted.value = true
-                                val mediaDir = context.externalCacheDirs.firstOrNull()?.let {
-                                    File(
-                                        it,
-                                        context.getString(R.string.app_name)
-                                    ).apply { mkdirs() }
-                                }
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterHorizontally)
+                        .clickable {
+                            if (!recordingStarted.value) {
+                                videoCapture.value?.let { videoCapture ->
+                                    recordingStarted.value = true
+                                    val mediaDir = context.externalCacheDirs
+                                        .firstOrNull()
+                                        ?.let {
+                                            File(
+                                                it,
+                                                context.getString(R.string.app_name)
+                                            ).apply { mkdirs() }
+                                        }
 
-                                recording = startRecordingVideo(
-                                    context = context,
-                                    filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
-                                    videoCapture = videoCapture,
-                                    outputDirectory = if (mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir,
-                                    executor = context.mainExecutor,
-                                    audioEnabled = audioEnabled.value
-                                ) { event ->
-                                    if (event is VideoRecordEvent.Finalize) {
-                                        val uri = event.outputResults.outputUri
-                                        if (uri != Uri.EMPTY) {
-                                            val uriEncoded = URLEncoder.encode(
-                                                uri.toString(),
-                                                StandardCharsets.UTF_8.toString()
-                                            )
-                                            dis = uriEncoded
+                                    recording = startRecordingVideo(
+                                        context = context,
+                                        filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                                        videoCapture = videoCapture,
+                                        outputDirectory = if (mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir,
+                                        executor = context.mainExecutor,
+                                        audioEnabled = audioEnabled.value
+                                    ) { event ->
+                                        if (event is VideoRecordEvent.Finalize) {
+                                            val uri = event.outputResults.outputUri
+                                            if (uri != Uri.EMPTY) {
+                                                val uriEncoded = URLEncoder.encode(
+                                                    uri.toString(),
+                                                    StandardCharsets.UTF_8.toString()
+                                                )
+                                                dis = uriEncoded
+                                            }
                                         }
                                     }
                                 }
+                            } else {
+                                recordingStarted.value = false
+                                recording?.stop()
                             }
-                        } else {
-                            recordingStarted.value = false
-                            recording?.stop()
-                        }
-                    },
+                        },
                     text = "Test recording"
                 )
             }
