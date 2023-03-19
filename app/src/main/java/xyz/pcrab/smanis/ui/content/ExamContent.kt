@@ -216,7 +216,7 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
                                 recording?.stop()
                             }
                         },
-                    text = "Test recording"
+                    text = (if (!recordingStarted.value) "Start" else "Stop") + " recording",
                 )
             }
         }

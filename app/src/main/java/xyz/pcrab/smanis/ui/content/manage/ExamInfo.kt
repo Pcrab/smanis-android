@@ -36,8 +36,8 @@ fun parseDisplayUri(
     uiState: SmanisUIState,
     uri: String
 ): String {
-    val localVideoFile = File(context.cacheDir, "$path$uri")
-    println(localVideoFile.absolutePath)
+    val localVideoFile = File(context.externalCacheDir, "$path$uri")
+    Log.d("SmanisViewModel", "checkVideoPath: ${localVideoFile.absolutePath}")
     var displayUri = localVideoFile.toURI().toString()
     if (!localVideoFile.exists()) {
         println("File not exist, downloading...")

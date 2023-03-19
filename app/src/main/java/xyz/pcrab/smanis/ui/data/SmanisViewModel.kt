@@ -1,6 +1,7 @@
 package xyz.pcrab.smanis.ui.data
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ktor.client.call.*
@@ -55,16 +56,18 @@ class SmanisViewModel : ViewModel() {
             try {
                 val finalPath =
                     if (path.isEmpty()) "" else if (path.endsWith("/")) path else "$path/"
-                val finalDirFile = File(context.cacheDir, finalPath)
+                val finalDirFile = File(context.externalCacheDir, finalPath)
                 if (!finalDirFile.exists()) {
                     finalDirFile.mkdirs()
                 }
+                Log.d("SmanisViewModel", "fetchVideoFile: $videoUri")
                 val response: ByteArray = Client.get(videoUri).body()
-                val file = File(context.cacheDir, "${finalPath}(fileName}")
-                val tmpFile = File(context.cacheDir, "${finalPath}${fileName}.tmp")
+                val file = File(finalDirFile, fileName)
+                val tmpFile = File(finalDirFile, "${fileName}.tmp")
                 tmpFile.writeBytes(response)
                 tmpFile.copyTo(file, overwrite = true)
                 tmpFile.delete()
+                Log.d("SmanisViewModel", "storeVideoPath: ${file.absolutePath}")
             } catch (e: ClientRequestException) {
                 e.printStackTrace()
             }
