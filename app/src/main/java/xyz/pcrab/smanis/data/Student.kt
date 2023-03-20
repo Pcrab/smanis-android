@@ -3,7 +3,7 @@ package xyz.pcrab.smanis.data
 data class Student(
     val id: String,
     val username: String,
-    val exams: List<Exam> = emptyList(),
+    var exams: Map<String, Exam> = emptyMap(),
 )
 
-typealias Students = List<Student>
+typealias Students = Map<String, Student>

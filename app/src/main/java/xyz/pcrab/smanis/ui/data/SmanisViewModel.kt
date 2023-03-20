@@ -10,6 +10,7 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import xyz.pcrab.smanis.data.Exam
@@ -23,6 +24,7 @@ class SmanisViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SmanisUIState())
     val uiState: StateFlow<SmanisUIState> = _uiState.asStateFlow()
 
+
     fun updateCurrentDestination(newDestination: String) {
         _uiState.value = _uiState.value.copy(currentDestination = newDestination)
     }
@@ -32,7 +34,18 @@ class SmanisViewModel : ViewModel() {
     }
 
     private fun updateAllStudents(newStudents: Students) {
-        _uiState.value = _uiState.value.copy(allStudents = newStudents)
+        _uiState.update {
+            it.copy(allStudents = newStudents)
+        }
+    }
+
+    private fun updateStudent(newStudent: Student) {
+        val newAllStudents = mutableMapOf<String, Student>()
+//        val newAllStudents = _uiState.value.allStudents.toMutableMap()
+        newAllStudents.putAll(_uiState.value.allStudents)
+        newAllStudents[newStudent.id] = newStudent
+        Log.d("UpdateStudent", "updateStudent: $newAllStudents")
+        updateAllStudents(newAllStudents.toMap())
     }
 
     fun initRemoteUrl(context: Context) {
@@ -49,6 +62,40 @@ class SmanisViewModel : ViewModel() {
         val realNewRemoteUrl = if (newRemoteUrl.endsWith("/")) newRemoteUrl else "$newRemoteUrl/"
         configFile.writeText(realNewRemoteUrl)
         _uiState.value = _uiState.value.copy(remoteUrl = realNewRemoteUrl)
+    }
+
+    fun fetchExams(uri: String, studentId: String) {
+        viewModelScope.launch {
+            try {
+                val student: Student =
+                    _uiState.value.allStudents[studentId]?.copy() ?: return@launch
+                Log.d(
+                    "SmanisFetchExams",
+                    "Fetching exams for ${uri}okGetFileList/$studentId"
+                )
+                val response: List<String> =
+                    Client.get(uri + "okGetFileList/$studentId").body<String>()
+                        .lines()
+                Log.d("SmanisFetchExams", "Response: $response")
+                val exams = response.slice(1..response.lastIndex).associate { rawExam ->
+                    val examData = rawExam.split(",")
+                    val examMetadata = examData[0].split("-")
+                    val id = "$studentId-${examMetadata[0]}"
+                    val score = examMetadata[1].toInt()
+                    val points = examData.slice(1..examData.lastIndex).map {
+                        it.split("-")
+                    }.associate {
+                        it[0] to it[1].toInt()
+                    }
+                    id to Exam(id, score, points, Instant.DISTANT_PAST)
+                }
+                student.exams = exams
+                Log.d("SmanisFetchExams", "Exams: $exams")
+                updateStudent(student)
+            } catch (e: Exception) {
+                Log.d("SmanisFetchExams", "fetchExams: $e")
+            }
+        }
     }
 
     fun fetchVideoFile(videoUri: String, path: String = "", fileName: String, context: Context) {
@@ -76,52 +123,22 @@ class SmanisViewModel : ViewModel() {
     }
 
     init {
-        updateAllStudents(
-            listOf(
-                Student(
-                    id = "110219", username = "Student 1", exams = listOf(
-                        Exam(
-                            id = "111112",
-                            video = "111112.mp4",
-                            score = 100,
-                            points = mapOf(
-                                "12000" to 8,
-                                "2000" to 10,
-                            ),
-                            takenTime = Instant.DISTANT_PAST
-                        ),
-                        Exam(
-                            id = "212233",
-                            video = "221133.mp4",
-                            score = 100,
-                            points = mapOf(
-                                "12000" to 8,
-                                "2000" to 10,
-                            ),
-                            takenTime = Instant.DISTANT_PAST
-                        ),
-                        Exam(
-                            id = "323124",
-                            video = "321321.mp4",
-                            score = 100,
-                            points = mapOf(),
-                            takenTime = Instant.DISTANT_PAST
-                        ),
-                    )
-                ),
-                Student(id = "291729", username = "Student 2"),
-                Student(id = "309921", username = "Student 3"),
-                Student(id = "489277", username = "Student 4"),
+        viewModelScope.launch {
+            updateAllStudents(
+                mapOf(
+                    "110219" to Student(id = "110219", username = "Student 1"),
+                    "291729" to Student(id = "291729", username = "Student 2"),
+                )
             )
-        )
-        updateCurrentStudent(null)
-        updateCurrentDestination(SmanisDestinations.MANAGE)
+            updateCurrentStudent(null)
+            updateCurrentDestination(SmanisDestinations.MANAGE)
+        }
     }
 }
 
 data class SmanisUIState(
+    val allStudents: Students = mapOf(),
     val currentStudent: Student? = null,
     val currentDestination: String = SmanisDestinations.MANAGE,
-    val allStudents: Students = emptyList(),
     val remoteUrl: String = "",
 )

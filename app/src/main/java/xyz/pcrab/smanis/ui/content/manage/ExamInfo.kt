@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -24,7 +25,6 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import io.ktor.client.request.*
-import xyz.pcrab.smanis.data.Exam
 import xyz.pcrab.smanis.ui.data.SmanisUIState
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
 import java.io.File
@@ -34,18 +34,18 @@ fun parseDisplayUri(
     viewModel: SmanisViewModel = SmanisViewModel(),
     path: String,
     uiState: SmanisUIState,
-    uri: String
+    frame: String
 ): String {
-    val localVideoFile = File(context.externalCacheDir, "$path$uri")
+    val localVideoFile = File(context.externalCacheDir, "$path${frame}.mp4")
     Log.d("SmanisViewModel", "checkVideoPath: ${localVideoFile.absolutePath}")
     var displayUri = localVideoFile.toURI().toString()
     if (!localVideoFile.exists()) {
         println("File not exist, downloading...")
-        displayUri = "${uiState.remoteUrl}${path}${uri}"
+        displayUri = "${uiState.remoteUrl}okGetOneFile/${frame}"
         viewModel.fetchVideoFile(
             videoUri = displayUri,
             path = path,
-            fileName = uri,
+            fileName = "${frame}.mp4",
             context = context
         )
     }
@@ -84,14 +84,14 @@ data class ExamPlayerInfo(
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun ExamInfo(
     modifier: Modifier = Modifier,
-    viewModel: SmanisViewModel = SmanisViewModel(),
     studentId: String? = null,
-    exam: Exam? = null,
+    examId: String? = null,
     onClickBack: () -> Unit = {},
 ) {
-    if (exam == null || studentId == null) return
+    val viewModel: SmanisViewModel = viewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    val exam = uiState.allStudents[studentId]?.exams?.get(examId) ?: return
     val interactionSource = MutableInteractionSource()
-    val uiState = viewModel.uiState.collectAsState().value
     val context = LocalContext.current
     val videoPath = "${studentId}/${exam.id}/"
 
@@ -107,7 +107,7 @@ fun ExamInfo(
                     uiState = uiState,
                     viewModel = viewModel,
                     path = videoPath,
-                    uri = "${it.key}.mp4"
+                    frame = it.key
                 )
             ),
             score = it.value
@@ -121,7 +121,7 @@ fun ExamInfo(
                 uiState = uiState,
                 viewModel = viewModel,
                 path = videoPath,
-                uri = "full.mp4"
+                frame = "out_all_1"
             )
         )
 
@@ -135,7 +135,6 @@ fun ExamInfo(
         Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable {
             onClickBack()
         })
-        Text(text = exam.video)
         Text(text = "remoteUrl: ${uiState.remoteUrl}")
 
         DisplayVideoView(context = context, exoPlayer = fullPlayer)

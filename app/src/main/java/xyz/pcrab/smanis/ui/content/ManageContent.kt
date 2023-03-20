@@ -8,8 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import xyz.pcrab.smanis.data.Exam
-import xyz.pcrab.smanis.data.Student
+import androidx.lifecycle.viewmodel.compose.viewModel
 import xyz.pcrab.smanis.ui.SmanisDestinations
 import xyz.pcrab.smanis.ui.content.manage.ExamInfo
 import xyz.pcrab.smanis.ui.content.manage.StudentInfo
@@ -29,16 +28,17 @@ fun ManageContent(
             ManageExtendedContent(modifier = modifier, viewModel = viewModel)
         }
         SmanisContentType.COMPACT -> {
-            ManageCompactContent(modifier = modifier.padding(20.dp), viewModel = viewModel)
+            ManageCompactContent(modifier = modifier.padding(20.dp))
         }
     }
 }
 
 @Composable
-fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewModel) {
-//    val uiState = viewModel.uiState.collectAsState().value
+fun ManageCompactContent(modifier: Modifier = Modifier) {
+    val viewModel: SmanisViewModel = viewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var displayStudent by remember {
-        mutableStateOf<Student?>(null)
+        mutableStateOf<String?>(null)
     }
 //    val showStudentInfo = remember {
 //        MutableTransitionState(false)
@@ -48,7 +48,7 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
 //    }
 
     var displayExam by remember {
-        mutableStateOf<Exam?>(null)
+        mutableStateOf<String?>(null)
     }
 //    val showExamInfo = remember {
 //        MutableTransitionState(false)
@@ -60,9 +60,8 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
     Box(modifier = modifier) {
         StudentList(
             modifier = Modifier.fillMaxSize(),
-            viewModel = viewModel,
             onClickStudent = {
-                displayStudent = it
+                displayStudent = it.id
 //                showStudentInfo.targetState = true
             })
 //        AnimatedVisibility(
@@ -74,17 +73,17 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
 //        ) {
         StudentInfo(
             modifier = Modifier.fillMaxSize(),
-            student = displayStudent,
+            studentId = displayStudent,
             onClickBack = {
                 displayStudent = null
 //                    showStudentInfo.targetState = false
             },
             onClickRecheck = {
 //                    showExamInfo.targetState = true
-                displayExam = it
+                displayExam = it?.id
             },
             onClickExam = {
-                viewModel.updateCurrentStudent(displayStudent)
+                viewModel.updateCurrentStudent(uiState.allStudents[displayStudent])
                 viewModel.updateCurrentDestination(SmanisDestinations.EXAM)
             })
 //        }
@@ -96,9 +95,8 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
 //        ) {
         ExamInfo(
             modifier = Modifier.fillMaxSize(),
-            viewModel = viewModel,
-            exam = displayExam,
-            studentId = displayStudent?.id,
+            examId = displayExam,
+            studentId = displayStudent,
             onClickBack = {
                 displayExam = null
 //                    showExamInfo.targetState = false
@@ -125,13 +123,12 @@ fun ManageCompactContent(modifier: Modifier = Modifier, viewModel: SmanisViewMod
 @Composable
 @Preview
 fun ManageCompactContentPreview() {
-    ManageCompactContent(viewModel = SmanisViewModel())
+    ManageCompactContent()
 }
 
 @Composable
 fun ManageExtendedContent(modifier: Modifier = Modifier, viewModel: SmanisViewModel) {
-//    val uiState = viewModel.uiState.collectAsState().value
-    StudentList(modifier = modifier, viewModel = viewModel)
+    StudentList(modifier = modifier)
     StudentInfo()
 }
 

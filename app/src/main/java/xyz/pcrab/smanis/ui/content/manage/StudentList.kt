@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import xyz.pcrab.smanis.R
 import xyz.pcrab.smanis.data.Student
 import xyz.pcrab.smanis.ui.data.SmanisViewModel
@@ -26,10 +27,10 @@ import xyz.pcrab.smanis.ui.data.SmanisViewModel
 @Composable
 fun StudentList(
     modifier: Modifier = Modifier,
-    viewModel: SmanisViewModel = SmanisViewModel(),
     onClickStudent: (student: Student) -> Unit = {}
 ) {
-    val uiState = viewModel.uiState.collectAsState().value
+    val viewModel: SmanisViewModel = viewModel()
+    val uiState by viewModel.uiState.collectAsState()
     var searchText by remember {
         mutableStateOf("")
     }
@@ -59,7 +60,7 @@ fun StudentList(
             onValueChange = {
                 searchText = it
                 displayStudents = uiState.allStudents.filter { student ->
-                    student.username.contains(it, true) || student.id.contains(it, true)
+                    student.value.username.contains(it, true) || student.value.id.contains(it, true)
                 }
             },
         )
@@ -67,7 +68,7 @@ fun StudentList(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             displayStudents.forEach { student ->
-                StudentCard(focusManager = focusManager, student = student) {
+                StudentCard(focusManager = focusManager, student = student.value) {
                     onClickStudent(it)
                 }
                 Spacer(modifier = Modifier.height(10.dp))

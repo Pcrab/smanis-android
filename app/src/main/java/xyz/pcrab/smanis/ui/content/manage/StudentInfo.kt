@@ -1,5 +1,6 @@
 package xyz.pcrab.smanis.ui.content.manage
 
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -11,23 +12,32 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import xyz.pcrab.smanis.R
 import xyz.pcrab.smanis.data.Exam
-import xyz.pcrab.smanis.data.Student
+import xyz.pcrab.smanis.ui.data.SmanisViewModel
 
 @Composable
 fun StudentInfo(
     modifier: Modifier = Modifier,
-    student: Student? = null,
+    studentId: String? = null,
     onClickBack: () -> Unit = {},
     onClickRecheck: (Exam?) -> Unit = {},
     onClickExam: () -> Unit = {}
 ) {
-    if (student == null) return
+    val viewModel: SmanisViewModel = viewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    val student = uiState.allStudents[studentId] ?: return
+    Log.d("ExamInfo", uiState.remoteUrl)
+    if (student.exams.isEmpty()) {
+        viewModel.fetchExams(uiState.remoteUrl, student.id)
+    }
     val interactionSource = MutableInteractionSource()
 
     Column(modifier = modifier
@@ -47,7 +57,8 @@ fun StudentInfo(
                     onClickExam()
                 })
         }
-        Text(text = "Previous exam scores")
+
+        Text(text = uiState.allStudents[studentId]?.exams.toString())
 
         Column(
             modifier = Modifier
@@ -55,7 +66,8 @@ fun StudentInfo(
                 .padding(top = 20.dp)
         ) {
             student.exams.forEach { exam ->
-                ExamCard(exam = exam, onClick = { onClickRecheck(exam) })
+                Text(text = exam.toString())
+                ExamCard(exam = exam.value, onClick = { onClickRecheck(exam.value) })
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
