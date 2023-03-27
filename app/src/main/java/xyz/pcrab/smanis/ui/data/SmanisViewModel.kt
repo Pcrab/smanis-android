@@ -59,7 +59,9 @@ class SmanisViewModel : ViewModel() {
 
     fun updateRemoteUrl(context: Context, newRemoteUrl: String) {
         val configFile = File(context.filesDir, "url.txt")
-        val realNewRemoteUrl = if (newRemoteUrl.endsWith("/")) newRemoteUrl else "$newRemoteUrl/"
+        val httpUrl =
+            if (newRemoteUrl.startsWith("http://")) newRemoteUrl else "http://$newRemoteUrl"
+        val realNewRemoteUrl = if (httpUrl.endsWith("/")) httpUrl else "$httpUrl/"
         configFile.writeText(realNewRemoteUrl)
         _uiState.value = _uiState.value.copy(remoteUrl = realNewRemoteUrl)
     }
