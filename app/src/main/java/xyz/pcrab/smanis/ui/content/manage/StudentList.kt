@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -92,8 +92,8 @@ fun StudentCard(
         Text(text = student.id, fontSize = fontSize * 0.8f)
     }, leadingContent = {
         Icon(
-            modifier = Modifier.size(30.dp),
-            imageVector = Icons.Rounded.Favorite,
+            modifier = Modifier.size(40.dp),
+            imageVector = Icons.Default.Person,
             contentDescription = "Student icon"
         )
     }, trailingContent = {
