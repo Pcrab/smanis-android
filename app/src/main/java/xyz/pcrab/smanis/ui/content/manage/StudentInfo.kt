@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -58,7 +56,15 @@ fun StudentInfo(
                 })
         }
 
-        Text(text = uiState.allStudents[studentId]?.exams.toString())
+        if (student.exams.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -66,7 +72,6 @@ fun StudentInfo(
                 .padding(top = 20.dp)
         ) {
             student.exams.forEach { exam ->
-                Text(text = exam.toString())
                 ExamCard(exam = exam.value, onClick = { onClickRecheck(exam.value) })
                 Spacer(modifier = Modifier.height(10.dp))
             }
@@ -89,12 +94,11 @@ fun ExamCard(
     ListItem(modifier = Modifier
         .clickable {
             onClick(exam)
-        }
-        .height(500.dp), headlineText = {
+        }, headlineText = {
         Text(text = exam.id, fontSize = fontSize)
     }, supportingText = {
         Text(
-            text = "${exam.score} $scoreUnit", fontSize = fontSize * 0.8f
+            text = "${exam.score} 分", fontSize = fontSize * 0.8f
         )
     }, leadingContent = {
 //        Spacer(modifier = Modifier.width(15.dp))
