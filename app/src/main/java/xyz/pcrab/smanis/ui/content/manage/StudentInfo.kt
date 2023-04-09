@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -83,28 +84,28 @@ fun StudentInfo(
 fun ExamCard(
     exam: Exam, onClick: (exam: Exam) -> Unit = {}
 ) {
-    val fontSize = 20.sp
+    val fontSize = 18.sp
     val scoreUnit = if (exam.score > 1) {
         stringResource(id = R.string.score_unit_plural)
     } else {
         stringResource(id = R.string.score_unit_single)
     }
 
-
     ListItem(modifier = Modifier
         .clickable {
             onClick(exam)
         }, headlineText = {
-        Text(text = exam.id, fontSize = fontSize)
+        Text(text = "${exam.score} 分", fontSize = fontSize * 0.9f)
     }, supportingText = {
         Text(
-            text = "${exam.score} 分", fontSize = fontSize * 0.8f
+            text = exam.takenTime, fontSize = fontSize * 0.8f
         )
     }, leadingContent = {
 //        Spacer(modifier = Modifier.width(15.dp))
     }, trailingContent = {
-        Row {
-            Text(text = "${exam.takenTime}")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = exam.id, fontSize = fontSize)
+            Spacer(modifier = Modifier.width(10.dp))
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "Go to student info"
@@ -112,4 +113,10 @@ fun ExamCard(
         }
 
     })
+}
+
+@Composable
+@Preview
+fun ExamCardPreview() {
+    ExamCard(exam = Exam("123", 100, mapOf("1000" to 8), "2023-04-09T15:34:44.426Z"))
 }

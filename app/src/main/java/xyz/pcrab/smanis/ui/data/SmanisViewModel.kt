@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import xyz.pcrab.smanis.data.Exam
 import xyz.pcrab.smanis.data.Student
 import xyz.pcrab.smanis.data.Students
@@ -89,7 +88,7 @@ class SmanisViewModel : ViewModel() {
                     }.associate {
                         it[0] to it[1].toInt()
                     }
-                    id to Exam(id, score, points, Instant.DISTANT_PAST)
+                    id to Exam(id, score, points, "2023-04-09T15:34:44.426Z")
                 }
                 student.exams = exams
                 Log.d("SmanisFetchExams", "Exams: $exams")
