@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Smanis</string>
+    <string name="app_name">中考网球计分系统APP</string>
     <string name="navigation_drawer">Navigation Drawer</string>
     <string name="tab_exam">考试</string>
     <string name="tab_manage">管理</string>
