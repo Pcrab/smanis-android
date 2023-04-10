@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "xyz.pcrab.smanis"
+    namespace = "xyz.pcrab.smaniszk"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "xyz.pcrab.smanis"
+        applicationId = "xyz.pcrab.smaniszk"
         minSdk = 28
         targetSdk = 33
         versionCode = 1
