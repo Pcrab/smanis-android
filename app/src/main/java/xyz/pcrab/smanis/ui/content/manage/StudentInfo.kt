@@ -41,7 +41,7 @@ fun StudentInfo(
 
     Column(modifier = modifier
         .background(MaterialTheme.colorScheme.inverseOnSurface)
-        .padding(horizontal = 10.dp)
+        .padding(20.dp)
         .clickable(interactionSource = interactionSource, indication = null) {}
         .focusable(true)) {
         Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable {
@@ -49,7 +49,7 @@ fun StudentInfo(
         })
         Text(text = student.username)
         Row {
-            Text(text = "Go to test")
+            Text(text = "开始考试")
             Icon(Icons.Default.ArrowForward,
                 contentDescription = "Go to test",
                 modifier = Modifier.clickable {
@@ -104,7 +104,7 @@ fun ExamCard(
 //        Spacer(modifier = Modifier.width(15.dp))
     }, trailingContent = {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = exam.id, fontSize = fontSize)
+            Text(text = "第${exam.id}场", fontSize = fontSize)
             Spacer(modifier = Modifier.width(10.dp))
             Icon(
                 imageVector = Icons.Default.ArrowForward,
@@ -118,5 +118,5 @@ fun ExamCard(
 @Composable
 @Preview
 fun ExamCardPreview() {
-    ExamCard(exam = Exam("123", 100, mapOf("1000" to 8), "2023-04-09T15:34:44.426Z"))
+    ExamCard(exam = Exam("123", 100, listOf(Pair("1000", 8)), "2023-04-09T15:34:44.426Z"))
 }

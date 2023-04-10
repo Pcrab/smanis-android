@@ -40,9 +40,11 @@ fun StudentList(
     val focusManager = LocalFocusManager.current
     val interactionSource = MutableInteractionSource()
     Column(
-        modifier = modifier.clickable(interactionSource = interactionSource, indication = null) {
-            focusManager.clearFocus()
-        },
+        modifier = modifier
+            .clickable(interactionSource = interactionSource, indication = null) {
+                focusManager.clearFocus()
+            }
+            .padding(20.dp),
     ) {
         val searchFontSize = 20.sp
         OutlinedTextField(

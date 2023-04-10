@@ -3,11 +3,9 @@ package xyz.pcrab.smanis.ui.content
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import xyz.pcrab.smanis.ui.SmanisDestinations
 import xyz.pcrab.smanis.ui.content.manage.ExamInfo
@@ -28,7 +26,7 @@ fun ManageContent(
             ManageExtendedContent(modifier = modifier, viewModel = viewModel)
         }
         SmanisContentType.COMPACT -> {
-            ManageCompactContent(modifier = modifier.padding(20.dp))
+            ManageCompactContent(modifier = modifier)
         }
     }
 }
