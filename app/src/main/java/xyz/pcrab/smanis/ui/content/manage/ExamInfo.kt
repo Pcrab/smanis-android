@@ -142,9 +142,35 @@ fun ExamInfo(
                 })
 
             Column {
+                Text(
+                    text = "落点分布图",
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp)
+                        .wrapContentHeight(),
+                    model = ImageRequest.Builder(context)
+                        .data(
+                            parseDisplayUri(
+                                type = "Transfer",
+                                ext = "jpg",
+                                path = filePath,
+                                frame = exam.points.last().first
+                            )
+                        )
+                        .build(), contentDescription = ""
+                )
+                Spacer(
+                    modifier = Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(Color.Gray)
+                )
                 players.forEach { (index, playerInfo) ->
                     Text(
-                        text = "第 ${index + 1} 球: ${playerInfo.score} 分",
+                        text = "第 ${index + 1} 球",
                         modifier = Modifier.padding(top = 10.dp)
                     )
                     DisplayVideoView(context = context, exoPlayer = playerInfo.player)

@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Smanis</string>
+    <string name="app_name">辅助裁判APP</string>
     <string name="navigation_drawer">Navigation Drawer</string>
-    <string name="tab_exam">考试</string>
+    <string name="tab_exam">训练</string>
     <string name="tab_manage">管理</string>
     <string name="tab_settings">设置</string>
     <string name="manage_search_label">搜索</string>

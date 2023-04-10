@@ -49,7 +49,7 @@ fun StudentInfo(
         })
         Text(text = student.username)
         Row {
-            Text(text = "开始考试")
+            Text(text = "开始训练")
             Icon(Icons.Default.ArrowForward,
                 contentDescription = "Go to test",
                 modifier = Modifier.clickable {
@@ -95,11 +95,11 @@ fun ExamCard(
         .clickable {
             onClick(exam)
         }, headlineText = {
-        Text(text = "${exam.score} 分", fontSize = fontSize * 0.9f)
+        Text(text = exam.takenTime, fontSize = fontSize * 0.9f)
     }, supportingText = {
-        Text(
-            text = exam.takenTime, fontSize = fontSize * 0.8f
-        )
+//        Text(
+//            text = exam.takenTime, fontSize = fontSize * 0.8f
+//        )
     }, leadingContent = {
 //        Spacer(modifier = Modifier.width(15.dp))
     }, trailingContent = {
