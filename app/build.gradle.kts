@@ -107,4 +107,6 @@ dependencies {
     val accompanistPermissionsVersion = "0.23.1"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistPermissionsVersion")
 
+    implementation("io.coil-kt:coil-compose:2.3.0")
+
 }

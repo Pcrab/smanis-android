@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Smanis</string>
     <string name="navigation_drawer">Navigation Drawer</string>
-    <string name="tab_exam">Exam</string>
-    <string name="tab_manage">Manage</string>
-    <string name="tab_settings">Settings</string>
-    <string name="manage_search_label">Search Student</string>
+    <string name="tab_exam">考试</string>
+    <string name="tab_manage">管理</string>
+    <string name="tab_settings">设置</string>
+    <string name="manage_search_label">搜索</string>
     <string name="score_unit_single">point</string>
     <string name="score_unit_plural">points</string>
 </resources>

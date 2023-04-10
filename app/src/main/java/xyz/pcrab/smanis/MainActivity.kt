@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         viewModel.initRemoteUrl(applicationContext)
+        viewModel.initResolution(applicationContext)
         println(viewModel.uiState.value.remoteUrl)
 
         val devicePostureFlow = WindowInfoTracker.getOrCreate(this).windowLayoutInfo(this)

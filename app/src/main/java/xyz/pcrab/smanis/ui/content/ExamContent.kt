@@ -2,20 +2,24 @@ package xyz.pcrab.smanis.ui.content
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.hardware.Camera
 import android.media.MediaRecorder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
-import android.widget.Button
-import android.widget.Spinner
 import androidx.camera.video.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
@@ -47,8 +51,16 @@ fun ExamContent(
 @Composable
 fun ExamCompactContent(viewModel: SmanisViewModel) {
     val uiModel = viewModel.uiState.collectAsState().value
-
     val context = LocalContext.current
+
+    var surface: SurfaceView? = null
+
+    val buttonText = remember {
+        mutableStateOf("开始录制")
+    }
+    val enablePreviewBtn = remember {
+        mutableStateOf(true)
+    }
 
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -61,6 +73,67 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
         permissionState.launchMultiplePermissionRequest()
     }
 
+    var mediaRecorder = MediaRecorder()
+    var camera = Camera.open()
+    fun startRecord(isPreview: Boolean = false) {
+        mediaRecorder = MediaRecorder()
+        mediaRecorder.reset()
+        camera = Camera.open()
+        camera.setDisplayOrientation(90)
+        camera.setDisplayOrientation(90)
+        camera.unlock()
+        mediaRecorder.setCamera(camera)
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+        mediaRecorder.setOrientationHint(0)
+        mediaRecorder.setVideoFrameRate(30)
+        if (isPreview) {
+            mediaRecorder.setVideoEncodingBitRate(16)
+        } else {
+            mediaRecorder.setVideoEncodingBitRate(125 * 1024 * 1024)
+        }
+
+        Log.i("Smanis Record", uiModel.resolution)
+
+        if (isPreview || uiModel.resolution !== "1280x720") {
+            mediaRecorder.setVideoSize(640, 480)
+        } else {
+            mediaRecorder.setVideoSize(1280, 720)
+        }
+
+        val finalDirFile = File(
+            (context.externalCacheDir?.absolutePath
+                ?: "/storage/emulated/0/datafile/tennis") + "/Smanis/" + (if (isPreview) "temp/" else "")
+        )
+        if (!finalDirFile.exists()) {
+            finalDirFile.mkdirs()
+        }
+        Log.i("Smanis Record", "Preview: $isPreview, ${finalDirFile.absolutePath}")
+        val finalFilePath =
+            finalDirFile.absolutePath + "/" + System.currentTimeMillis() + ".mp4"
+        Log.i("Smanis Record", finalFilePath)
+        mediaRecorder.setOutputFile(finalFilePath)
+
+        mediaRecorder.setPreviewDisplay(surface?.holder?.surface)
+
+        try {
+            mediaRecorder.prepare()
+            mediaRecorder.start()
+            camera.autoFocus { _, _ -> }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun stopRecord() {
+        mediaRecorder.stop()
+        mediaRecorder.release()
+        camera.release()
+        startRecord(true)
+    }
+
+
     PermissionsRequired(
         multiplePermissionsState = permissionState,
         permissionsNotGrantedContent = { /* ... */ },
@@ -71,105 +144,54 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
             AndroidView(
                 factory = { context ->
                     val view = LayoutInflater.from(context).inflate(R.layout.layout, null, false)
-
-                    val surface = view.findViewById<SurfaceView>(R.id.CameraPreview)
-
-                    val previewBtn = view.findViewById<Button>(R.id.PreviewBtn)
-
-                    val recordBtn = view.findViewById<Button>(R.id.RecordBtn)
-                    recordBtn.setBackgroundColor(Color.parseColor("#DDF8C7"))
-
-                    val spinner = view.findViewById<Spinner>(R.id.ResolutionSpinner)
-                    spinner.setSelection(1)
-
-
-                    var mediaRecorder = MediaRecorder()
-                    var camera = Camera.open()
-
-                    fun startRecord(isPreview: Boolean = false) {
-                        if (isPreview) {
-                            previewBtn.isEnabled = false
-                        }
-                        mediaRecorder = MediaRecorder()
-                        mediaRecorder.reset()
-                        camera = Camera.open()
-                        camera.setDisplayOrientation(90)
-                        camera.setDisplayOrientation(90)
-                        camera.unlock()
-                        mediaRecorder.setCamera(camera)
-                        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
-                        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-                        mediaRecorder.setOrientationHint(0)
-                        mediaRecorder.setVideoFrameRate(30)
-                        if (isPreview) {
-                            mediaRecorder.setVideoEncodingBitRate(16)
-                        } else {
-                            mediaRecorder.setVideoEncodingBitRate(125 * 1024 * 1024)
-                        }
-
-                        Log.i("Smanis Record", spinner.selectedItem.toString())
-
-                        if (isPreview || spinner.selectedItem.toString() !== "1280x720") {
-                            mediaRecorder.setVideoSize(640, 480)
-                        } else {
-                            mediaRecorder.setVideoSize(1280, 720)
-                        }
-
-                        val finalDirFile = File(
-                            (context.externalCacheDir?.absolutePath
-                                ?: "/storage/emulated/0/datafile/tennis") + "/Smanis/" + (if (isPreview) "temp/" else "")
-                        )
-                        if (!finalDirFile.exists()) {
-                            finalDirFile.mkdirs()
-                        }
-                        Log.i("Smanis Record", "Preview: $isPreview, ${finalDirFile.absolutePath}")
-                        val finalFilePath =
-                            finalDirFile.absolutePath + "/" + System.currentTimeMillis() + ".mp4"
-                        Log.i("Smanis Record", finalFilePath)
-                        mediaRecorder.setOutputFile(finalFilePath)
-
-                        mediaRecorder.setPreviewDisplay(surface.holder.surface)
-
-                        try {
-                            mediaRecorder.prepare()
-                            mediaRecorder.start()
-                            camera.autoFocus { _, _ -> }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-
-                    fun stopRecord() {
-                        mediaRecorder.stop()
-                        mediaRecorder.release()
-                        camera.release()
-                        startRecord(true)
-                    }
-
-
-
-                    previewBtn.setOnClickListener { startRecord(true) }
-
-                    recordBtn.setOnClickListener {
-                        if (recordBtn.text == "开始录制") {
-                            recordBtn.text = "停止录制"
-                            recordBtn.setBackgroundColor(Color.parseColor("#F8CDC7"))
-                            startRecord()
-                        } else {
-                            recordBtn.text = "开始录制"
-                            recordBtn.setBackgroundColor(Color.parseColor("#DDF8C7"))
-                            stopRecord()
-                        }
-                    }
-
-
-                    // do whatever you want...
+                    surface = view.findViewById(R.id.CameraPreview)
                     view
                 },
                 modifier = Modifier
                     .fillMaxWidth()
             )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                ElevatedButton(
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color(0xFF000000),
+                        containerColor = if (enablePreviewBtn.value) {
+                            Color(0xFFDDF8C7)
+                        } else if (buttonText.value == "开始录制") {
+                            Color(0xFFDDF8C7)
+                        } else {
+                            Color(0xFFF8CDC7)
+                        }
+                    ),
+                    onClick = { ->
+                        if (enablePreviewBtn.value) {
+                            enablePreviewBtn.value = false
+                            startRecord(true)
+                            return@ElevatedButton
+                        }
+                        if (buttonText.value == "开始录制") {
+                            buttonText.value = "停止录制"
+                            startRecord()
+                        } else {
+                            buttonText.value = "开始录制"
+                            stopRecord()
+                        }
+                    },
+                ) {
+                    Text(
+                        text = if (enablePreviewBtn.value) {
+                            "打开摄像头"
+                        } else {
+                            buttonText.value
+                        }, fontWeight = FontWeight.Bold, fontSize = 20.sp
+                    )
+                }
+            }
         }
     }
 }

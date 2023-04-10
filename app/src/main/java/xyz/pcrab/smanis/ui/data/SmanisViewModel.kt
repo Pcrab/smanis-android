@@ -56,6 +56,15 @@ class SmanisViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(remoteUrl = configFile.readText())
     }
 
+    fun initResolution(context: Context) {
+        val defaultResolution = "620x480"
+        val configFile = File(context.filesDir, "resolution.txt")
+        if (!configFile.exists()) {
+            configFile.writeText(defaultResolution)
+        }
+        _uiState.value = _uiState.value.copy(resolution = configFile.readText())
+    }
+
     fun updateRemoteUrl(context: Context, newRemoteUrl: String) {
         val configFile = File(context.filesDir, "url.txt")
         val httpUrl =
@@ -63,6 +72,12 @@ class SmanisViewModel : ViewModel() {
         val realNewRemoteUrl = if (httpUrl.endsWith("/")) httpUrl else "$httpUrl/"
         configFile.writeText(realNewRemoteUrl)
         _uiState.value = _uiState.value.copy(remoteUrl = realNewRemoteUrl)
+    }
+
+    fun updateResolution(context: Context, newResolution: String) {
+        val configFile = File(context.filesDir, "resolution.txt")
+        configFile.writeText(newResolution)
+        _uiState.value = _uiState.value.copy(resolution = newResolution)
     }
 
     fun fetchExams(uri: String, studentId: String) {
@@ -81,14 +96,14 @@ class SmanisViewModel : ViewModel() {
                 val exams = response.slice(1..response.lastIndex).associate { rawExam ->
                     val examData = rawExam.split(",")
                     val examMetadata = examData[0].split("-")
-                    val id = "$studentId-${examMetadata[0]}"
+                    val id = examMetadata[0]
                     val score = examMetadata[1].toInt()
-                    val points = examData.slice(1..examData.lastIndex).map {
-                        it.split("-")
-                    }.associate {
-                        it[0] to it[1].toInt()
+                    val takenTime = examData[1]
+                    val points = examData.slice(2..examData.lastIndex).map {
+                        val point = it.split("-")
+                        Pair(point[0], point[1].toInt())
                     }
-                    id to Exam(id, score, points, "2023-04-09T15:34:44.426Z")
+                    id to Exam(id, score, points, takenTime)
                 }
                 student.exams = exams
                 Log.d("SmanisFetchExams", "Exams: $exams")
@@ -127,8 +142,8 @@ class SmanisViewModel : ViewModel() {
         viewModelScope.launch {
             updateAllStudents(
                 mapOf(
-                    "110219" to Student(id = "110219", username = "Student 1"),
-                    "291729" to Student(id = "291729", username = "Student 2"),
+                    "110219" to Student(id = "110219", username = "学生1"),
+                    "291729" to Student(id = "291729", username = "学生2"),
                 )
             )
             updateCurrentStudent(null)
@@ -142,4 +157,5 @@ data class SmanisUIState(
     val currentStudent: Student? = null,
     val currentDestination: String = SmanisDestinations.MANAGE,
     val remoteUrl: String = "",
+    val resolution: String = "",
 )
