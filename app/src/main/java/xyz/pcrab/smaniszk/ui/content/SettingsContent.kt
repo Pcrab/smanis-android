@@ -89,12 +89,12 @@ fun SettingsCompactContent(viewModel: SmanisViewModel) {
                 .padding(bottom = 10.dp, start = 10.dp)
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(selected = uiState.resolution == "620x480", onClick = {
-                viewModel.updateResolution(context, "620x480")
+            RadioButton(selected = uiState.resolution == "640x480", onClick = {
+                viewModel.updateResolution(context, "640x480")
             },
-                modifier = Modifier.semantics { contentDescription = "620x480" }
+                modifier = Modifier.semantics { contentDescription = "640x480" }
             )
-            Text(text = "620x480", modifier = Modifier.padding(start = 10.dp))
+            Text(text = "640x480", modifier = Modifier.padding(start = 10.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(selected = uiState.resolution == "1280x720", onClick = {

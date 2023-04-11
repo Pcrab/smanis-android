@@ -57,7 +57,7 @@ class SmanisViewModel : ViewModel() {
     }
 
     fun initResolution(context: Context) {
-        val defaultResolution = "620x480"
+        val defaultResolution = "640x480"
         val configFile = File(context.filesDir, "resolution.txt")
         if (!configFile.exists()) {
             configFile.writeText(defaultResolution)
