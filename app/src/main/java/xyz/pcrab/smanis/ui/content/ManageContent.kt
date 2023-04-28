@@ -35,9 +35,9 @@ fun ManageContent(
 fun ManageCompactContent(modifier: Modifier = Modifier) {
     val viewModel: SmanisViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
-    var displayStudent by remember {
-        mutableStateOf<String?>(null)
-    }
+//    var displayStudent by remember {
+//        mutableStateOf<String?>(null)
+//    }
 //    val showStudentInfo = remember {
 //        MutableTransitionState(false)
 //    }
@@ -59,7 +59,8 @@ fun ManageCompactContent(modifier: Modifier = Modifier) {
         StudentList(
             modifier = Modifier.fillMaxSize(),
             onClickStudent = {
-                displayStudent = it.id
+                viewModel.updateCurrentStudent(it)
+//                displayStudent = it.id
 //                showStudentInfo.targetState = true
             })
 //        AnimatedVisibility(
@@ -71,17 +72,18 @@ fun ManageCompactContent(modifier: Modifier = Modifier) {
 //        ) {
         StudentInfo(
             modifier = Modifier.fillMaxSize(),
-            studentId = displayStudent,
+            studentId = uiState.currentStudent?.id,
             onClickBack = {
-                displayStudent = null
-//                    showStudentInfo.targetState = false
+                viewModel.updateCurrentStudent(null)
+//                displayStudent = null
+//                showStudentInfo.targetState = false
             },
             onClickRecheck = {
 //                    showExamInfo.targetState = true
                 displayExam = it?.id
             },
             onClickExam = {
-                viewModel.updateCurrentStudent(uiState.allStudents[displayStudent])
+//                viewModel.updateCurrentStudent(uiState.allStudents[displayStudent])
                 viewModel.updateCurrentDestination(SmanisDestinations.EXAM)
             })
 //        }
@@ -94,7 +96,7 @@ fun ManageCompactContent(modifier: Modifier = Modifier) {
         ExamInfo(
             modifier = Modifier.fillMaxSize(),
             examId = displayExam,
-            studentId = displayStudent,
+            studentId = uiState.currentStudent?.id,
             onClickBack = {
                 displayExam = null
 //                    showExamInfo.targetState = false
@@ -105,8 +107,9 @@ fun ManageCompactContent(modifier: Modifier = Modifier) {
     BackHandler {
         if (displayExam != null) {
             displayExam = null
-        } else if (displayStudent != null) {
-            displayStudent = null
+        } else if (uiState.currentStudent != null) {
+//            displayStudent = null
+            viewModel.updateCurrentStudent(null)
 //        if (showExamInfo.currentState) {
 //            showExamInfo.targetState = false
 //        } else if (showStudentInfo.currentState) {

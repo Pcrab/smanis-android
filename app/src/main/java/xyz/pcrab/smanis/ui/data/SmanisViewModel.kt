@@ -4,9 +4,15 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +31,9 @@ class SmanisViewModel : ViewModel() {
 
 
     fun updateCurrentDestination(newDestination: String) {
+        if (newDestination == SmanisDestinations.SETTINGS) {
+            _uiState.value = _uiState.value.copy(currentStudent = null)
+        }
         _uiState.value = _uiState.value.copy(currentDestination = newDestination)
     }
 
@@ -138,6 +147,39 @@ class SmanisViewModel : ViewModel() {
 
     }
 
+    fun uploadVideoFile(fileName: String) {
+        _uiState.update {
+            it.copy(submitting = true)
+        }
+        viewModelScope.launch {
+            try {
+                val file = File(fileName)
+                val response = Client.post(_uiState.value.remoteUrl + "uploadVideo") {
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append("file", file.readBytes(), Headers.build {
+                                    append(HttpHeaders.ContentType, "video/mp4")
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${_uiState.value.currentStudent?.id ?: "000000"}-${file.name}"
+                                    )
+                                })
+                            },
+                        )
+                    )
+                }
+                Log.i("Upload Video", "filename=${_uiState.value.currentStudent?.id ?: "000000"}-${file.name}")
+                _uiState.update {
+                    it.copy(submitting = false)
+                }
+                updateCurrentDestination(SmanisDestinations.MANAGE)
+            } catch (e: ClientRequestException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     init {
         viewModelScope.launch {
             updateAllStudents(
@@ -158,4 +200,5 @@ data class SmanisUIState(
     val currentDestination: String = SmanisDestinations.MANAGE,
     val remoteUrl: String = "",
     val resolution: String = "",
+    val submitting: Boolean = false,
 )
