@@ -10,6 +10,7 @@ import android.view.SurfaceView
 import androidx.camera.video.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -56,9 +57,12 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
     var surface: SurfaceView? = null
 
     val buttonText = remember {
-        mutableStateOf("开始录制")
+        mutableStateOf("打开摄像头")
     }
-    val enablePreviewBtn = remember {
+    val outputFilePath = remember {
+        mutableStateOf("")
+    }
+    val enableBtn = remember {
         mutableStateOf(true)
     }
 
@@ -112,6 +116,9 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
         Log.i("Smanis Record", "Preview: $isPreview, ${finalDirFile.absolutePath}")
         val finalFilePath =
             finalDirFile.absolutePath + "/" + System.currentTimeMillis() + ".mp4"
+        if (!isPreview) {
+            outputFilePath.value = finalFilePath
+        }
         Log.i("Smanis Record", finalFilePath)
         mediaRecorder.setOutputFile(finalFilePath)
 
@@ -130,7 +137,8 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
         mediaRecorder.stop()
         mediaRecorder.release()
         camera.release()
-        startRecord(true)
+        enableBtn.value = false
+//        startRecord(true)
     }
 
 
@@ -160,36 +168,43 @@ fun ExamCompactContent(viewModel: SmanisViewModel) {
                 ElevatedButton(
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color(0xFF000000),
-                        containerColor = if (enablePreviewBtn.value) {
-                            Color(0xFFDDF8C7)
-                        } else if (buttonText.value == "开始录制") {
-                            Color(0xFFDDF8C7)
-                        } else {
+                        containerColor = if (buttonText.value == "停止录制") {
                             Color(0xFFF8CDC7)
+                        } else {
+                            Color(0xFFDDF8C7)
                         }
                     ),
+                    enabled = enableBtn.value,
                     onClick = { ->
-                        if (enablePreviewBtn.value) {
-                            enablePreviewBtn.value = false
-                            startRecord(true)
-                            return@ElevatedButton
-                        }
-                        if (buttonText.value == "开始录制") {
-                            buttonText.value = "停止录制"
-                            startRecord()
-                        } else {
-                            buttonText.value = "开始录制"
-                            stopRecord()
+                        when (buttonText.value) {
+                            "打开摄像头" -> {
+                                buttonText.value = "开始录制"
+                                startRecord(true)
+                            }
+                            "开始录制" -> {
+                                buttonText.value = "停止录制"
+                                startRecord()
+                            }
+                            else -> {
+                                stopRecord()
+                            }
                         }
                     },
                 ) {
                     Text(
-                        text = if (enablePreviewBtn.value) {
-                            "打开摄像头"
-                        } else {
-                            buttonText.value
-                        }, fontWeight = FontWeight.Bold, fontSize = 20.sp
+                        text = buttonText.value, fontWeight = FontWeight.Bold, fontSize = 20.sp
                     )
+                }
+                ElevatedButton(
+                    onClick = { viewModel.uploadVideoFile(outputFilePath.value) },
+                    enabled = !uiModel.submitting && !enableBtn.value,
+                    modifier = Modifier.padding(start = 20.dp).height(40.dp)
+                ) {
+                    if (uiModel.submitting) {
+                        CircularProgressIndicator(modifier = Modifier.size(30.dp).padding(0.dp))
+                    } else {
+                        Text(text = "上传", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    }
                 }
             }
         }
